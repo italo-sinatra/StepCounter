@@ -62,7 +62,7 @@ sudo apt-get install git
 
 1. **Clone ou baixe o projeto:**
    ```bash
-   git clone [URL_DO_REPOSITÓRIO]
+   git clone [[[URL_DO_REPOSITÓRIO]](https://github.com/italo-sinatra/StepCounter.git)](https://github.com/italo-sinatra/StepCounter.git)
    cd StepCounter-main
    ```
    
