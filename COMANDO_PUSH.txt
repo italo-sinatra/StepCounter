@@ -1,0 +1,35 @@
+═══════════════════════════════════════════════════════════════
+🚀 COMANDO PARA FAZER PUSH AO GITHUB
+═══════════════════════════════════════════════════════════════
+
+1. Abra o Terminal
+2. Execute os comandos abaixo:
+
+cd /Users/Lucas/Downloads/StepCounter-main
+git push -u origin main --force-with-lease
+
+3. Quando solicitado:
+   Username: italo-sinatra
+   Password: [Seu Personal Access Token]
+
+═══════════════════════════════════════════════════════════════
+📝 COMO CRIAR PERSONAL ACCESS TOKEN:
+═══════════════════════════════════════════════════════════════
+
+1. Acesse: https://github.com/settings/tokens
+2. Clique em "Generate new token (classic)"
+3. Nome: "StepCounter Push"
+4. Permissões: Marque "repo"
+5. Clique em "Generate token"
+6. COPIE o token gerado (você não verá novamente!)
+7. Use este token como senha ao fazer push
+
+═══════════════════════════════════════════════════════════════
+✅ APÓS O PUSH:
+═══════════════════════════════════════════════════════════════
+
+Seu código estará em:
+https://github.com/italo-sinatra/StepCounter
+
+═══════════════════════════════════════════════════════════════
+
