@@ -63,8 +63,51 @@ sudo apt-get install nginx
 ```
 
 **Windows:**
-- Baixe em: http://nginx.org/en/download.html
-- Ou use WSL (Windows Subsystem for Linux)
+⚠️ **IMPORTANTE:** Para Windows, é **OBRIGATÓRIO** usar WSL (Windows Subsystem for Linux). O Nginx no Windows nativo apresenta problemas de configuração e não é recomendado.
+
+**Instalar WSL no Windows:**
+
+1. **Abrir PowerShell como Administrador:**
+   - Clique com botão direito no menu Iniciar
+   - Selecione "Windows PowerShell (Admin)" ou "Terminal (Admin)"
+
+2. **Instalar WSL:**
+   ```powershell
+   wsl --install
+   ```
+   
+   Ou para instalação manual:
+   ```powershell
+   dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+   dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+   ```
+
+3. **Reiniciar o computador** (se solicitado)
+
+4. **Instalar distribuição Linux (Ubuntu recomendado):**
+   ```powershell
+   wsl --install -d Ubuntu
+   ```
+   
+   Ou via Microsoft Store:
+   - Abra a Microsoft Store
+   - Procure por "Ubuntu"
+   - Instale a versão mais recente
+
+5. **Configurar usuário Linux:**
+   - Após a instalação, abra o Ubuntu
+   - Crie um usuário e senha quando solicitado
+
+6. **Instalar Nginx no WSL:**
+   ```bash
+   sudo apt-get update
+   sudo apt-get install nginx
+   ```
+
+7. **Verificar instalação:**
+   ```bash
+   nginx -v
+   ```
 
 ### 4. Git (opcional, mas recomendado)
 
@@ -158,10 +201,47 @@ chmod +x install.sh
 
 Para servir a aplicação na rede local e permitir acesso de outros dispositivos, siga estes passos:
 
+### ⚠️ IMPORTANTE: Windows + WSL
+
+**Se você está usando Windows, DEVE usar WSL (Windows Subsystem for Linux).**
+
+**Passos para Windows:**
+
+1. **Instalar WSL (se ainda não instalado):**
+   - Abra PowerShell como Administrador
+   - Execute: `wsl --install`
+   - Reinicie o computador
+   - Instale Ubuntu: `wsl --install -d Ubuntu`
+
+2. **Abrir WSL:**
+   - Abra o Ubuntu no menu Iniciar
+   - Ou execute `wsl` no PowerShell/CMD
+
+3. **Acessar o projeto no WSL:**
+   ```bash
+   # O projeto Windows está em /mnt/c/Users/SeuUsuario/...
+   # Exemplo:
+   cd /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main
+   ```
+
+4. **Instalar Node.js no WSL (se necessário):**
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```
+
+5. **Instalar dependências no WSL:**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+
+6. **Siga as instruções de configuração do Nginx abaixo (no WSL)**
+
 ### Passo 1: Fazer Build da Aplicação
 
 Antes de configurar o Nginx, é necessário criar o build de produção:
 
+**No WSL (Windows) ou Terminal (macOS/Linux):**
 ```bash
 npm run build
 ```
@@ -189,6 +269,8 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
    ⚠️ **Nota:** Será solicitada a senha do sudo para configurar o Nginx.
 
 #### Opção B: Configuração Manual
+
+**Para macOS/Linux:**
 
 1. **Criar diretório de servidores:**
    ```bash
@@ -223,6 +305,79 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
    sudo nginx
    ```
 
+**Para Windows (WSL - Ubuntu):**
+
+1. **Criar diretório de servidores:**
+   ```bash
+   sudo mkdir -p /etc/nginx/sites-available
+   sudo mkdir -p /etc/nginx/sites-enabled
+   ```
+
+2. **Copiar configuração:**
+   ```bash
+   # Primeiro, ajuste o caminho no nginx-stepcounter.conf para o caminho do WSL
+   # Exemplo: root /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist;
+   
+   sudo cp nginx-stepcounter.conf /etc/nginx/sites-available/stepcounter.conf
+   sudo ln -s /etc/nginx/sites-available/stepcounter.conf /etc/nginx/sites-enabled/
+   ```
+
+3. **Ajustar configuração do Nginx principal:**
+   ```bash
+   sudo nano /etc/nginx/nginx.conf
+   ```
+   
+   Adicione ou verifique esta linha no bloco `http`:
+   ```nginx
+   include /etc/nginx/sites-enabled/*;
+   ```
+
+4. **Criar diretório de logs:**
+   ```bash
+   sudo mkdir -p /var/log/nginx
+   ```
+
+5. **Ajustar caminho no arquivo de configuração:**
+   ```bash
+   sudo nano /etc/nginx/sites-available/stepcounter.conf
+   ```
+   
+   Altere a linha `root` para o caminho completo do WSL:
+   ```nginx
+   root /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist;
+   ```
+   
+   Altere os caminhos de log também:
+   ```nginx
+   access_log /var/log/nginx/stepcounter-access.log;
+   error_log /var/log/nginx/stepcounter-error.log;
+   ```
+
+6. **Verificar configuração:**
+   ```bash
+   sudo nginx -t
+   ```
+
+7. **Iniciar Nginx:**
+   ```bash
+   sudo service nginx start
+   ```
+   
+   Ou:
+   ```bash
+   sudo nginx
+   ```
+
+8. **Verificar status:**
+   ```bash
+   sudo service nginx status
+   ```
+   
+   Ou:
+   ```bash
+   sudo nginx -s reload
+   ```
+
 ### Passo 3: Verificar IP da Máquina
 
 Para acessar de outros dispositivos, você precisa do IP da sua máquina:
@@ -232,12 +387,25 @@ Para acessar de outros dispositivos, você precisa do IP da sua máquina:
 ifconfig | grep "inet " | grep -v 127.0.0.1
 ```
 
-**Windows:**
+**Windows (WSL):**
 ```bash
+# No WSL, você precisa do IP do Windows, não do WSL
+# Execute no PowerShell do Windows:
 ipconfig
+
+# Ou no WSL, você pode usar:
+hostname -I
 ```
 
-Procure por um endereço IP como `192.168.x.x` ou `10.0.x.x`.
+**⚠️ IMPORTANTE para Windows:**
+- O WSL tem seu próprio IP interno
+- Para acesso de outros dispositivos, use o IP do **Windows Host**, não do WSL
+- Para obter o IP do Windows a partir do WSL:
+  ```bash
+  # No WSL, execute:
+  ip route show | grep -i default | awk '{ print $3}'
+  ```
+- Ou execute `ipconfig` no PowerShell do Windows e use o IP da sua placa de rede Wi-Fi/Ethernet
 
 ### Passo 4: Acessar a Aplicação
 
@@ -300,6 +468,32 @@ sudo ufw reload
 sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 ```
 
+### Configurar Firewall (Windows)
+
+**⚠️ IMPORTANTE:** No Windows, você precisa configurar o firewall do Windows, não do WSL.
+
+1. **Abrir Firewall do Windows:**
+   - Pressione `Win + R`
+   - Digite: `wf.msc`
+   - Pressione Enter
+
+2. **Criar regra de entrada:**
+   - Clique em "Regras de Entrada" → "Nova Regra"
+   - Selecione "Porta" → Avançar
+   - Selecione "TCP" e "Portas locais específicas"
+   - Digite: `80`
+   - Selecione "Permitir a conexão"
+   - Marque todas as opções (Domínio, Privada, Pública)
+   - Dê um nome: "Nginx HTTP"
+   - Clique em "Concluir"
+
+3. **Verificar regra:**
+   - A regra deve aparecer na lista de regras de entrada
+   - Certifique-se de que está habilitada (verde)
+
+4. **Testar:**
+   - De outro dispositivo na mesma rede, tente acessar: `http://[IP_DO_WINDOWS]`
+
 ## 🔄 Atualizar Aplicação
 
 Após fazer alterações no código:
@@ -337,19 +531,41 @@ chmod +x stop-nginx.sh
 
 ### Ver Status do Nginx
 
+**macOS/Linux:**
 ```bash
 sudo nginx -t
 pgrep -x nginx
 ```
 
+**Windows (WSL):**
+```bash
+sudo nginx -t
+sudo service nginx status
+# Ou
+pgrep -x nginx
+```
+
 ### Ver Logs
 
+**macOS/Linux:**
 ```bash
 # Logs de acesso
 tail -f /usr/local/var/log/nginx/stepcounter-access.log
 
 # Logs de erro
 tail -f /usr/local/var/log/nginx/stepcounter-error.log
+```
+
+**Windows (WSL):**
+```bash
+# Logs de acesso
+sudo tail -f /var/log/nginx/stepcounter-access.log
+
+# Logs de erro
+sudo tail -f /var/log/nginx/stepcounter-error.log
+
+# Logs gerais do Nginx
+sudo tail -f /var/log/nginx/error.log
 ```
 
 ## 📁 Estrutura do Projeto
@@ -581,6 +797,172 @@ sudo lsof -i :80
 # Edite nginx-stepcounter.conf e altere:
 listen 8080;  # Use outra porta
 ```
+
+### Problema: Windows - WSL não consegue acessar arquivos do Windows
+
+**Sintoma:**
+- Erro ao acessar arquivos em `/mnt/c/...`
+- Permissões negadas
+
+**Solução:**
+1. **Verificar montagem do Windows:**
+   ```bash
+   ls -la /mnt/c/Users/
+   ```
+
+2. **Ajustar permissões (se necessário):**
+   ```bash
+   # No Windows, certifique-se de que o WSL tem acesso aos arquivos
+   # Você pode precisar ajustar as permissões do Windows
+   ```
+
+3. **Usar caminho completo:**
+   - Certifique-se de usar o caminho completo no arquivo de configuração do Nginx
+   - Exemplo: `/mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist`
+
+### Problema: Windows - Nginx no WSL não responde de outros dispositivos
+
+**Sintoma:**
+- Nginx funciona localmente no WSL
+- Não consegue acessar de outros dispositivos na rede
+
+**Solução:**
+1. **Verificar IP do Windows:**
+   ```powershell
+   # No PowerShell do Windows:
+   ipconfig
+   ```
+   - Use o IP do Windows Host (não do WSL)
+   - Geralmente é o IP da placa Wi-Fi ou Ethernet
+
+2. **Configurar firewall do Windows:**
+   - Siga as instruções em [Configurar Firewall (Windows)](#configurar-firewall-windows)
+   - Certifique-se de permitir a porta 80
+
+3. **Verificar se o Nginx está escutando em 0.0.0.0:**
+   ```bash
+   # No WSL, edite o arquivo de configuração:
+   sudo nano /etc/nginx/sites-available/stepcounter.conf
+   ```
+   - Certifique-se de que está: `listen 80;` (não `listen 127.0.0.1:80;`)
+
+4. **Reiniciar Nginx:**
+   ```bash
+   sudo service nginx restart
+   ```
+
+5. **Verificar se está rodando:**
+   ```bash
+   sudo netstat -tlnp | grep :80
+   ```
+
+### Problema: Windows - Erro ao iniciar Nginx no WSL
+
+**Sintoma:**
+- Erro ao executar `sudo nginx` ou `sudo service nginx start`
+
+**Solução:**
+1. **Verificar se o Nginx está instalado:**
+   ```bash
+   nginx -v
+   ```
+
+2. **Verificar configuração:**
+   ```bash
+   sudo nginx -t
+   ```
+
+3. **Verificar se há outro processo usando a porta:**
+   ```bash
+   sudo netstat -tlnp | grep :80
+   ```
+
+4. **Verificar logs de erro:**
+   ```bash
+   sudo tail -f /var/log/nginx/error.log
+   ```
+
+5. **Iniciar manualmente:**
+   ```bash
+   sudo nginx -c /etc/nginx/nginx.conf
+   ```
+
+### Problema: Windows - Caminho não encontrado no Nginx
+
+**Sintoma:**
+- Erro 404 ao acessar a aplicação
+- Nginx não encontra os arquivos
+
+**Solução:**
+1. **Verificar caminho no arquivo de configuração:**
+   ```bash
+   sudo nano /etc/nginx/sites-available/stepcounter.conf
+   ```
+   - Verifique se o caminho `root` está correto
+   - Use caminho absoluto do WSL: `/mnt/c/Users/...`
+
+2. **Verificar se a pasta dist existe:**
+   ```bash
+   ls -la /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist
+   ```
+
+3. **Fazer build novamente:**
+   ```bash
+   npm run build
+   ```
+
+4. **Verificar permissões:**
+   ```bash
+   # No Windows, certifique-se de que o WSL tem acesso de leitura
+   chmod -R 755 /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist
+   ```
+
+### Problema: Windows - WSL não inicia
+
+**Sintoma:**
+- Erro ao executar `wsl`
+- WSL não está disponível
+
+**Solução:**
+1. **Verificar se o WSL está instalado:**
+   ```powershell
+   wsl --list --verbose
+   ```
+
+2. **Instalar WSL:**
+   ```powershell
+   wsl --install
+   ```
+
+3. **Verificar recursos do Windows:**
+   - Abra "Recursos do Windows"
+   - Verifique se "Subsistema do Windows para Linux" está habilitado
+   - Verifique se "Plataforma de Máquina Virtual" está habilitada
+
+4. **Reiniciar o computador**
+
+### Problema: Windows - Node.js não funciona no WSL
+
+**Sintoma:**
+- Comando `node` não encontrado no WSL
+- npm não funciona
+
+**Solução:**
+1. **Instalar Node.js no WSL:**
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```
+
+2. **Verificar instalação:**
+   ```bash
+   node --version
+   npm --version
+   ```
+
+3. **Se já tiver Node.js no Windows:**
+   - O Node.js do Windows não funciona no WSL
+   - Você precisa instalar Node.js separadamente no WSL
 
 ## 🛠️ Tecnologias Utilizadas
 
