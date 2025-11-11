@@ -252,16 +252,26 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
 
 #### Opção A: Configuração Automática (Recomendado)
 
+**Para macOS/Linux:**
 1. **Execute o script de configuração:**
    ```bash
    chmod +x setup-nginx.sh
    ./setup-nginx.sh
    ```
 
+**Para Windows (WSL):**
+1. **Execute o script de configuração específico para WSL:**
+   ```bash
+   chmod +x setup-nginx-wsl.sh
+   ./setup-nginx-wsl.sh
+   ```
+
    O script irá:
+   - ✅ Verificar se está no WSL
    - ✅ Verificar se o Nginx está instalado
    - ✅ Fazer build do projeto (se necessário)
-   - ✅ Criar configuração do Nginx
+   - ✅ Criar configuração do Nginx para WSL
+   - ✅ Ajustar caminhos automaticamente
    - ✅ Configurar permissões
    - ✅ Testar configuração
    - ✅ Reiniciar Nginx
