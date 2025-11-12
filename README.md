@@ -1164,17 +1164,104 @@ npm run build
 
 ### 3. Configurar Nginx
 ```bash
-chmod +x setup-nginx.sh
-./setup-nginx.sh
+chmod +x scripts/nginx/configure-nginx.sh
+./scripts/nginx/configure-nginx.sh
 ```
 
-### 4. Acessar
+### 4. Verificar Tudo
+```bash
+chmod +x start-project.sh
+./start-project.sh
+```
+
+### 5. Acessar
 - **Local:** http://localhost
 - **Rede:** http://[SEU_IP]
 
-### 5. Acessar de Outro Dispositivo
+### 6. Acessar de Outro Dispositivo
 - Conecte na mesma rede Wi-Fi
 - Acesse: http://[IP_DA_MAQUINA_SERVIDOR]
+
+## 📋 Scripts Disponíveis
+
+### Scripts Principais
+
+| Script | Descrição | Localização |
+|--------|-----------|-------------|
+| `start-project.sh` | Verificação completa do projeto | Raiz do projeto |
+| `scripts/nginx/configure-nginx.sh` | Configuração completa do Nginx | `scripts/nginx/` |
+| `scripts/setup/install.sh` | Instalação de dependências | `scripts/setup/` |
+
+### Scripts do Nginx
+
+| Script | Descrição | Localização |
+|--------|-----------|-------------|
+| `configure-nginx.sh` | Configuração completa (Linux/WSL) | `scripts/nginx/` |
+| `setup-nginx.sh` | Configuração (macOS/Linux) | `scripts/nginx/` |
+| `setup-nginx-wsl.sh` | Configuração (WSL) | `scripts/nginx/` |
+| `start-nginx.sh` | Iniciar/reiniciar Nginx | `scripts/nginx/` |
+| `stop-nginx.sh` | Parar Nginx | `scripts/nginx/` |
+
+### Scripts de Instalação
+
+| Script | Descrição | Localização |
+|--------|-----------|-------------|
+| `install.sh` | Instalação (Linux/macOS) | `scripts/setup/` |
+| `install.bat` | Instalação (Windows) | `scripts/setup/` |
+
+## 📚 Documentação
+
+A documentação está organizada em `manuais/`:
+
+- **Instalação**: `manuais/instalacao/`
+  - `INSTALACAO_RAPIDA.md` - Guia rápido de instalação
+  - `REQUIREMENTS.md` - Lista de dependências
+  - `CHECKLIST_INSTALACAO.md` - Checklist de verificação
+  - `SETUP_INSTRUCTIONS.md` - Instruções de setup
+
+- **Nginx**: `manuais/nginx/`
+  - `NGINX_SETUP.md` - Configuração completa do Nginx
+  - `INICIO_RAPIDO_NGINX.md` - Guia rápido do Nginx
+
+- **Git**: `manuais/git/`
+  - `INSTRUCOES_GIT.md` - Instruções para Git
+  - `PUSH_AGORA.md` - Guia rápido de push
+
+- **Geral**: `manuais/geral/`
+  - `DOCUMENTACAO.md` - Índice de documentação
+  - `RESUMO_ARQUIVOS.md` - Resumo dos arquivos
+  - `ESTRUTURA_PROJETO.md` - Estrutura do projeto (consulte este arquivo)
+
+## 🔄 Fluxo de Trabalho Recomendado
+
+1. **Verificar projeto:**
+   ```bash
+   ./start-project.sh
+   ```
+
+2. **Instalar dependências (se necessário):**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+
+3. **Fazer build:**
+   ```bash
+   npm run build
+   ```
+
+4. **Configurar Nginx:**
+   ```bash
+   ./scripts/nginx/configure-nginx.sh
+   ```
+
+5. **Verificar novamente:**
+   ```bash
+   ./start-project.sh
+   ```
+
+6. **Acessar aplicação:**
+   - Local: http://localhost
+   - Rede: http://[IP_DA_MAQUINA]
 
 ---
 
