@@ -252,31 +252,30 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
 
 #### Opção A: Configuração Automática (Recomendado)
 
-**Para macOS/Linux:**
-1. **Execute o script de configuração:**
+**Para Linux e WSL (Windows):**
+1. **Execute o script de configuração completa:**
    ```bash
-   chmod +x setup-nginx.sh
-   ./setup-nginx.sh
-   ```
-
-**Para Windows (WSL):**
-1. **Execute o script de configuração específico para WSL:**
-   ```bash
-   chmod +x setup-nginx-wsl.sh
-   ./setup-nginx-wsl.sh
+   chmod +x scripts/nginx/configure-nginx.sh
+   ./scripts/nginx/configure-nginx.sh
    ```
 
    O script irá:
-   - ✅ Verificar se está no WSL
+   - ✅ Detectar automaticamente Linux ou WSL
    - ✅ Verificar se o Nginx está instalado
+   - ✅ Verificar Node.js e npm
    - ✅ Fazer build do projeto (se necessário)
-   - ✅ Criar configuração do Nginx para WSL
-   - ✅ Ajustar caminhos automaticamente
+   - ✅ Criar configuração do Nginx automaticamente
+   - ✅ Ajustar caminhos dinamicamente
    - ✅ Configurar permissões
    - ✅ Testar configuração
-   - ✅ Reiniciar Nginx
+   - ✅ Iniciar/reiniciar Nginx
+   - ✅ Mostrar IP da máquina
 
    ⚠️ **Nota:** Será solicitada a senha do sudo para configurar o Nginx.
+
+**Scripts alternativos (legados):**
+- `scripts/nginx/setup-nginx.sh` - Para macOS/Linux
+- `scripts/nginx/setup-nginx-wsl.sh` - Para WSL (Windows)
 
 #### Opção B: Configuração Manual
 
@@ -325,10 +324,10 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
 
 2. **Copiar configuração:**
    ```bash
-   # Primeiro, ajuste o caminho no nginx-stepcounter.conf para o caminho do WSL
+   # Primeiro, ajuste o caminho no arquivo de configuração para o caminho do WSL
    # Exemplo: root /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist;
    
-   sudo cp nginx-stepcounter.conf /etc/nginx/sites-available/stepcounter.conf
+   sudo cp configs/nginx/nginx-stepcounter-wsl.conf /etc/nginx/sites-available/stepcounter.conf
    sudo ln -s /etc/nginx/sites-available/stepcounter.conf /etc/nginx/sites-enabled/
    ```
 
@@ -357,7 +356,7 @@ Isso criará a pasta `dist/` com os arquivos estáticos da aplicação.
    root /mnt/c/Users/SeuUsuario/Downloads/StepCounter-main/dist;
    ```
    
-   Altere os caminhos de log também:
+   Os caminhos de log já estão configurados corretamente para WSL:
    ```nginx
    access_log /var/log/nginx/stepcounter-access.log;
    error_log /var/log/nginx/stepcounter-error.log;
@@ -515,12 +514,17 @@ Após fazer alterações no código:
 
 2. **Recarregar Nginx:**
    ```bash
-   ./start-nginx.sh
+   ./scripts/nginx/start-nginx.sh
    ```
 
    Ou manualmente:
    ```bash
    sudo nginx -s reload
+   ```
+   
+   Ou use o script de configuração completa:
+   ```bash
+   ./scripts/nginx/configure-nginx.sh
    ```
 
 ## 🛠️ Scripts Úteis do Nginx
@@ -528,16 +532,41 @@ Após fazer alterações no código:
 ### Iniciar/Reiniciar Nginx
 
 ```bash
-chmod +x start-nginx.sh
-./start-nginx.sh
+chmod +x scripts/nginx/start-nginx.sh
+./scripts/nginx/start-nginx.sh
 ```
 
 ### Parar Nginx
 
 ```bash
-chmod +x stop-nginx.sh
-./stop-nginx.sh
+chmod +x scripts/nginx/stop-nginx.sh
+./scripts/nginx/stop-nginx.sh
 ```
+
+### Configurar Nginx (Completo)
+
+```bash
+chmod +x scripts/nginx/configure-nginx.sh
+./scripts/nginx/configure-nginx.sh
+```
+
+### Verificar Projeto Completo
+
+```bash
+chmod +x start-project.sh
+./start-project.sh
+```
+
+Este script verifica:
+- ✅ Sistema operacional (Linux/WSL)
+- ✅ Instalação de Node.js, npm, Nginx
+- ✅ Estrutura de pastas
+- ✅ Arquivos essenciais
+- ✅ Configurações do Nginx
+- ✅ Dependências instaladas
+- ✅ Build criado
+- ✅ Serviços rodando
+- ✅ Configuração de rede
 
 ### Ver Status do Nginx
 
@@ -578,36 +607,60 @@ sudo tail -f /var/log/nginx/stepcounter-error.log
 sudo tail -f /var/log/nginx/error.log
 ```
 
+**Logs do projeto:**
+```bash
+# Log do script de configuração
+tail -f nginx-setup.log
+
+# Log do script de inicialização
+tail -f project-startup.log
+```
+
 ## 📁 Estrutura do Projeto
 
 ```
 StepCounter/
-├── src/
-│   ├── react-app/           # Aplicação React
-│   │   ├── components/      # Componentes reutilizáveis
+├── 📄 README.md                    # Documentação principal
+├── 🚀 start-project.sh             # Script de inicialização completa
+├── 📦 package.json                 # Dependências do projeto
+├── ⚙️ vite.config.ts               # Configuração do Vite
+├── ⚙️ tsconfig.json                # Configuração do TypeScript
+├── ⚙️ tailwind.config.js           # Configuração do Tailwind CSS
+│
+├── 📁 src/                         # Código fonte
+│   ├── react-app/                  # Aplicação React
+│   │   ├── components/             # Componentes React
 │   │   │   └── StepCounter.tsx
-│   │   ├── pages/          # Páginas da aplicação
+│   │   ├── pages/                  # Páginas da aplicação
 │   │   │   └── Home.tsx
-│   │   ├── App.tsx         # Componente principal
-│   │   ├── main.tsx        # Ponto de entrada
-│   │   └── index.css       # Estilos globais
-│   ├── worker/             # Backend (Cloudflare Worker)
+│   │   ├── App.tsx                 # Componente principal
+│   │   ├── main.tsx                # Ponto de entrada
+│   │   └── index.css               # Estilos globais
+│   ├── worker/                     # Backend (Cloudflare Worker)
 │   │   └── index.ts
-│   └── shared/             # Tipos compartilhados
+│   └── shared/                     # Tipos compartilhados
 │       └── types.ts
-├── dist/                   # Build de produção (gerado)
-├── public/                 # Arquivos estáticos (se houver)
-├── index.html             # Página HTML principal
-├── package.json           # Dependências e scripts
-├── vite.config.ts         # Configuração do Vite
-├── tailwind.config.js     # Configuração do Tailwind CSS
-├── tsconfig.json          # Configuração do TypeScript
-├── nginx-stepcounter.conf # Configuração do Nginx
-├── setup-nginx.sh         # Script de configuração do Nginx
-├── start-nginx.sh         # Script para iniciar/reiniciar Nginx
-├── stop-nginx.sh          # Script para parar Nginx
-└── README.md             # Este arquivo
+│
+├── 📁 manuais/                     # Documentação organizada
+│   ├── instalacao/                 # Manuais de instalação
+│   ├── nginx/                      # Manuais do Nginx
+│   ├── git/                        # Manuais do Git
+│   └── geral/                      # Outros manuais
+│
+├── 📁 scripts/                     # Scripts organizados
+│   ├── setup/                      # Scripts de instalação
+│   ├── nginx/                      # Scripts do Nginx
+│   └── git/                        # Scripts do Git
+│
+├── 📁 configs/                     # Configurações
+│   └── nginx/                      # Configurações do Nginx
+│
+├── 📁 dist/                        # Build de produção (gerado)
+├── 📁 node_modules/                # Dependências (gerado)
+└── 📄 index.html                   # Página HTML principal
 ```
+
+**📋 Para mais detalhes sobre a estrutura, consulte:** `ESTRUTURA_PROJETO.md`
 
 ## 📜 Scripts Disponíveis
 
